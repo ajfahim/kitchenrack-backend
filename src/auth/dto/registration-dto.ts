@@ -1,14 +1,13 @@
 import {
   IsEmail,
   IsEnum,
-  IsInt,
   IsNotEmpty,
   IsPhoneNumber,
   IsString,
 } from 'class-validator';
 import { UserRole } from 'src/common/types/user';
 
-export class CreateUserDto {
+export class RegistrationDto {
   @IsString()
   @IsNotEmpty()
   full_name: string;
@@ -27,7 +26,4 @@ export class CreateUserDto {
   @IsEnum(UserRole)
   @IsNotEmpty()
   role: UserRole;
-
-  @IsInt()
-  auth_id: number;
 }

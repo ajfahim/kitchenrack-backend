@@ -12,8 +12,8 @@ export const generateOtpWithMessage = (otpType: OtpType) => {
   );
 
   // Set expiration for registration OTP (10 Minutes)
-  const expiresAt = new Date();
-  expiresAt.setMinutes(expiresAt.getMinutes() + otpValidityMin);
+  const expireAt = new Date();
+  expireAt.setMinutes(expireAt.getMinutes() + otpValidityMin);
 
   //set messages
   switch (otpType) {
@@ -33,10 +33,10 @@ export const generateOtpWithMessage = (otpType: OtpType) => {
       throw new Error('Unsupported OTP type');
   }
 
-  return { otpCode, expiresAt, otpMessage };
+  return { otpCode, expireAt, otpMessage };
 };
 
 const generateRandomOtp = () => {
-  // Generate a random 6-digit OTP (for example)
+  // Generate a random 6-digit OTP
   return Math.floor(100000 + Math.random() * 900000).toString();
 };

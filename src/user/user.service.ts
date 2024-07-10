@@ -1,9 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { OtpType } from 'src/common/types/otpTypes';
-import { SmsProvider } from 'src/common/types/smsProvider';
-import { generateOtpWithMessage } from 'src/common/utils/generateOtp';
-import { sendSms } from 'src/common/utils/sendSms';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -11,22 +7,41 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserService {
   constructor(private prisma: PrismaService) {}
   async create(data: Prisma.UserCreateInput) {
-    const otp = await generateOtpWithMessage(OtpType.REGISTRATION);
-    const smsRes = await sendSms(
-      SmsProvider.BULKSMSBD,
-      otp.otpMessage,
-      data.phone,
-    );
-    // return this.prisma.user.create({ data });
-    return smsRes;
+    const existingPhone = await this.findOneByPhone(data.phone);
+
+    if (existingPhone)
+      throw new ConflictException('Phone number already registered');
+
+    const existingEmail = await this.findOneByEmail(data.email);
+
+    if (existingEmail) {
+      throw new ConflictException('Email already registered');
+    }
+    return this.prisma.user.create({ data });
   }
 
   findAll() {
     return `This action returns all user`;
   }
 
-  findOne(id: number) {
+  findOneById(id: number) {
     return `This action returns a #${id} user`;
+  }
+
+  async findOneByPhone(phone: string) {
+    return this.prisma.user.findUnique({
+      where: {
+        phone,
+      },
+    });
+  }
+
+  async findOneByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

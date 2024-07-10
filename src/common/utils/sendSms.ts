@@ -20,6 +20,7 @@ export const sendSms = async (
       try {
         const response = await axios.post(url);
         if (response.data?.response_code == 202) {
+          console.log('SMS sent successfully');
           return response.data;
         }
       } catch (err) {
