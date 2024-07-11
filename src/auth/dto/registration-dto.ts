@@ -2,6 +2,7 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsPhoneNumber,
   IsString,
 } from 'class-validator';
@@ -12,18 +13,15 @@ export class RegistrationDto {
   @IsNotEmpty()
   full_name: string;
 
-  @IsString()
-  @IsNotEmpty()
-  password: string;
-
+  @IsOptional()
   @IsEmail()
   email?: string;
 
-  @IsPhoneNumber()
+  @IsPhoneNumber('BD')
   @IsNotEmpty()
   phone: string;
 
+  @IsOptional()
   @IsEnum(UserRole)
-  @IsNotEmpty()
-  role: UserRole;
+  role?: UserRole;
 }

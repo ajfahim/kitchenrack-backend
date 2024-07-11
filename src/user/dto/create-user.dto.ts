@@ -1,7 +1,6 @@
 import {
   IsEmail,
   IsEnum,
-  IsInt,
   IsNotEmpty,
   IsPhoneNumber,
   IsString,
@@ -13,21 +12,13 @@ export class CreateUserDto {
   @IsNotEmpty()
   full_name: string;
 
-  @IsString()
-  @IsNotEmpty()
-  password: string;
-
   @IsEmail()
   email?: string;
 
-  @IsPhoneNumber()
+  @IsPhoneNumber('BD')
   @IsNotEmpty()
   phone: string;
 
   @IsEnum(UserRole)
-  @IsNotEmpty()
   role: UserRole;
-
-  @IsInt()
-  auth_id: number;
 }

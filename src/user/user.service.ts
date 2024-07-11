@@ -7,12 +7,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserService {
   constructor(private prisma: PrismaService) {}
   async create(data: Prisma.UserCreateInput) {
-    const existingPhone = await this.findOneByPhone(data.phone);
+    const existingPhone = data.phone && (await this.findOneByPhone(data.phone));
 
     if (existingPhone)
       throw new ConflictException('Phone number already registered');
 
-    const existingEmail = await this.findOneByEmail(data.email);
+    const existingEmail =
+      data?.email && (await this.findOneByEmail(data?.email));
 
     if (existingEmail) {
       throw new ConflictException('Email already registered');

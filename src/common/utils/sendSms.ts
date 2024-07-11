@@ -1,4 +1,7 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import {
+  BadRequestException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { SmsProvider } from '../types/smsProvider';
@@ -17,18 +20,13 @@ export const sendSms = async (
       const senderId = configService.get<string>('BULKSMSBD_SENDER_ID');
       url = `http://bulksmsbd.net/api/smsapi?api_key=${apiKey}&type=text&number=${phoneNumber}&senderid=${senderId}&message=${message}`;
 
-      try {
-        const response = await axios.post(url);
-        if (response.data?.response_code == 202) {
-          console.log('SMS sent successfully');
-          return response.data;
-        }
-      } catch (err) {
-        console.error('Failed to send SMS: ', err.error_message);
-        throw new HttpException(
-          'Failed to send SMS',
-          HttpStatus.SERVICE_UNAVAILABLE,
-        );
+      const response = await axios.post(url);
+      if (response.data?.response_code !== 202) {
+        throw new BadRequestException(response.data.error_message);
       }
+      console.log('SMS sent successfully');
+      return response.data;
+    default:
+      return new ServiceUnavailableException('SMS provider not found');
   }
 };
