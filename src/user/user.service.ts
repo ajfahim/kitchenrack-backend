@@ -10,7 +10,7 @@ export class UserService {
     const existingPhone = data.phone && (await this.findOneByPhone(data.phone));
 
     if (existingPhone)
-      throw new ConflictException('Phone number already registered');
+      throw new ConflictException('Phone number already registered. Try Login');
 
     const existingEmail =
       data?.email && (await this.findOneByEmail(data?.email));
