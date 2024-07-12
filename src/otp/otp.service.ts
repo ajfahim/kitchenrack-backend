@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { VerifyOtpDto } from 'src/auth/dto/verify-otp.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -12,7 +13,7 @@ export class OtpService {
       type: data.type,
     });
     if (existingOtp) {
-      await this.deleteOtp(existingOtp.id);
+      await this.deleteOtp(existingOtp.id, data.type);
     }
     //store otp
     return await this.prismaService.otp.create({ data });
@@ -24,7 +25,24 @@ export class OtpService {
   }
 
   //delete otp by id
-  async deleteOtp(id: number) {
-    return await this.prismaService.otp.delete({ where: { id } });
+  async deleteOtp(id: number, type: string) {
+    return await this.prismaService.otp.delete({
+      where: { user_id_type: { user_id: id, type } },
+    });
+  }
+
+  //verify otp
+  async verifyOtp(data: VerifyOtpDto) {
+    const otp = await this.prismaService.otp.findUnique({
+      where: {
+        user_id_type: { user_id: parseInt(data.user_id), type: data.type },
+      },
+    });
+    if (!!otp) {
+      if (otp.code === data.code) {
+        return true;
+      }
+    }
+    return false;
   }
 }

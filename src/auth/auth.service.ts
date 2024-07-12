@@ -6,6 +6,7 @@ import { sendSms } from 'src/common/utils/sendSms';
 import { OtpService } from 'src/otp/otp.service';
 import { UserService } from 'src/user/user.service';
 import { RegistrationDto } from './dto/registration-dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 
 @Injectable()
 export class AuthService {
@@ -32,8 +33,13 @@ export class AuthService {
     return otp;
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  verifyOtp(data: VerifyOtpDto) {
+    const verified = this.otpService.verifyOtp(data);
+
+    // delete otp if verified successfully
+    // generate token and return if verified successfully
+
+    return verified;
   }
 
   findOne(id: number) {

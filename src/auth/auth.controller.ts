@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegistrationDto } from './dto/registration-dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -19,9 +20,9 @@ export class AuthController {
     return this.authService.registration(registrationDto);
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('verify-otp')
+  verifyOtp(@Body() data: VerifyOtpDto) {
+    return this.authService.verifyOtp(data);
   }
 
   @Get(':id')
