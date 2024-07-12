@@ -1,4 +1,5 @@
-import { IsDate, IsNotEmpty } from 'class-validator';
+import { IsDate, IsEnum, IsNotEmpty } from 'class-validator';
+import { OtpType } from 'src/common/types/otpTypes';
 
 export class StoreOtpDto {
   @IsNotEmpty()
@@ -7,4 +8,8 @@ export class StoreOtpDto {
   @IsNotEmpty()
   @IsDate()
   expiresAt: Date;
+
+  @IsNotEmpty()
+  @IsEnum(OtpType)
+  type: string;
 }

@@ -25,6 +25,7 @@ export class AuthService {
     const otp = await this.otpService.storeOtp({
       code: otpCode,
       expireAt,
+      type: OtpType.REGISTRATION,
       User: { connect: { id: user.id } },
     });
 

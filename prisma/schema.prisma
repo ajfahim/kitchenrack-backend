@@ -39,6 +39,7 @@ model Auth {
 model Otp {
   id        Int      @id @default(autoincrement())
   code      String
+  type      String
   createdAt DateTime @default(now())
   expireAt  DateTime
 
