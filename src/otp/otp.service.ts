@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class OtpService {
   constructor(private readonly prismaService: PrismaService) {}
   async storeOtp(data: Prisma.OtpCreateInput) {
-    // delete the existing otp with same type if exists
+    // delete the existing otp with same type if exists (this is only possible if the user have not used the otp before. because upon verify the otp gets deleted)
     const existingOtp = await this.findOneByUserAndType({
       user_id: data.User.connect.id,
       type: data.type,
@@ -40,6 +40,8 @@ export class OtpService {
     });
     if (!!otp) {
       if (otp.code === data.code) {
+        //delete the otp after verification
+        await this.deleteOtp(otp.id, data.type);
         return true;
       }
     }
