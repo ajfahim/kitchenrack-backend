@@ -22,11 +22,11 @@ export const generateOtpWithMessage = (otpType: OtpType) => {
       break;
 
     case OtpType.LOGIN:
-      otpMessage = `Welcome to Kitchen Rack. Your OTP for login is ${otpCode}. This code is only valid for ${otpValidityMin}.`;
+      otpMessage = `Welcome to Kitchen Rack. Your OTP for login is ${otpCode}. This code is only valid for ${otpValidityMin} minutes.`;
       break;
 
     case OtpType.ORDER_PLACEMENT:
-      otpMessage = `Welcome to Kitchen Rack. Your OTP for order placement is ${otpCode}. This code is only valid for ${otpValidityMin}.`;
+      otpMessage = `Welcome to Kitchen Rack. Your OTP for order placement is ${otpCode}. This code is only valid for ${otpValidityMin} minutes.`;
       break;
 
     default:

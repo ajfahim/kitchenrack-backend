@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import { VerifyOtpDto } from 'src/auth/dto/verify-otp.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class OtpService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly ConfigService: ConfigService,
+  ) {}
   async storeOtp(data: Prisma.OtpCreateInput) {
     // delete the existing otp with same type if exists (this is only possible if the user have not used the otp before. because upon verify the otp gets deleted)
     const existingOtp = await this.findOneByUserAndType({
@@ -21,6 +25,7 @@ export class OtpService {
 
   //find otp with user id and type
   async findOneByUserAndType(data: Prisma.OtpWhereInput) {
+    console.log('🚀 ~ OtpService ~ findOneByUserAndType ~ data:', data);
     return await this.prismaService.otp.findFirst({ where: data });
   }
 
@@ -35,13 +40,21 @@ export class OtpService {
   async verifyOtp(data: VerifyOtpDto) {
     const otp = await this.prismaService.otp.findUnique({
       where: {
-        user_id_type: { user_id: parseInt(data.user_id), type: data.type },
+        user_id_type: {
+          user_id: parseInt(data.user.id),
+          type: data.type,
+        },
       },
     });
     if (!!otp) {
       if (otp.code === data.code) {
+        // check if otp is expired
+        if (otp.expireAt < new Date()) {
+          console.log('otp expired');
+          return false;
+        }
         //delete the otp after verification
-        await this.deleteOtp(otp.id, data.type);
+        await this.deleteOtp(otp.user_id, data.type);
         return true;
       }
     }
