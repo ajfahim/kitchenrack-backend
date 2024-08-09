@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { OtpType } from 'src/common/types/otpTypes';
 import { generateOtpWithMessage } from 'src/common/utils/generateOtp';
@@ -15,6 +16,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly otpService: OtpService,
     private readonly jwtService: JwtService,
+    private readonly ConfigService: ConfigService,
   ) {}
   async registration(data: RegistrationDto) {
     //create user
@@ -42,16 +44,21 @@ export class AuthService {
     console.log('🚀 ~ AuthService ~ verifyOtp ~ verified:', verified);
     // generate token and return if verified successfully
     if (verified) {
-      const accessToken = generateToken(this.jwtService, {
+      const accessToken = await generateToken(this.jwtService, {
         payload: { ...data.user },
         options: {
-          expiresIn: '1d',
+          expiresIn: this.ConfigService.get<string>(
+            'jwt.accessTokenExpiration',
+          ),
         },
       });
-      const refreshToken = generateToken(this.jwtService, {
+
+      const refreshToken = await generateToken(this.jwtService, {
         payload: { ...data.user },
         options: {
-          expiresIn: '30d',
+          expiresIn: this.ConfigService.get<string>(
+            'jwt.refreshTokenExpiration',
+          ),
         },
       });
       return { accessToken, refreshToken };
@@ -86,6 +93,26 @@ export class AuthService {
       User: { connect: { id: user.id } },
     });
     return { success: true, message: 'OTP sent', data: user };
+  }
+
+  async refreshToken(cookies: Record<string, string>) {
+    //verify the refresh token
+    const verified = this.jwtService.verify(cookies.refresh_token);
+    if (!verified) {
+      throw new HttpException('Invalid refresh token', HttpStatus.FORBIDDEN);
+    }
+    //generate new access token
+
+    // decode refreshToken
+    const data = this.jwtService.decode(cookies.refresh_token);
+    const accessToken = await generateToken(this.jwtService, {
+      payload: { ...data.user },
+      options: {
+        expiresIn: this.ConfigService.get<string>('jwt.accessTokenExpiration'),
+      },
+    });
+
+    return { accessToken };
   }
 
   findOne(id: number) {

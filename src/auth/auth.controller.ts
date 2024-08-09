@@ -6,14 +6,19 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { AuthenticationGuard } from 'src/auth/guards/authentication.guard';
+import sendResponse from 'src/common/utils/sendResponse';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegistrationDto } from './dto/registration.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 
+@UseGuards(AuthenticationGuard)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -34,9 +39,26 @@ export class AuthController {
   ) {
     const { accessToken, refreshToken } =
       await this.authService.verifyOtp(data);
-    response.cookie('access-token', accessToken, { httpOnly: true });
-    response.cookie('refresh-token', refreshToken, { httpOnly: true });
-    return { success: true };
+    response.cookie('access_token', accessToken);
+    response.cookie('refresh_token', refreshToken);
+  }
+
+  @Get('refresh-token')
+  async refreshToken(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    console.log(request.cookies);
+    const { accessToken } = await this.authService.refreshToken(
+      request.cookies,
+    );
+    response.cookie('access_token', accessToken);
+    return sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: 'refreshed',
+      data: null,
+    });
   }
 
   @Get(':id')

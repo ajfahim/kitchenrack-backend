@@ -8,5 +8,14 @@ export const generateToken = async (
   jwtService: JwtService,
   payload: generateTokenPayload,
 ) => {
-  return jwtService.sign(payload);
+  const token = await jwtService.sign(payload);
+  return token;
+};
+
+export const verifyToken = async (jwtService: JwtService, token: string) => {
+  return jwtService.verify(token);
+};
+
+export const decodeToken = async (jwtService: JwtService, token: string) => {
+  return jwtService.decode(token);
 };
