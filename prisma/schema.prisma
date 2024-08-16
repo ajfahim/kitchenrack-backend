@@ -48,3 +48,44 @@ model Otp {
 
   @@id([user_id, type])
 }
+
+model Product {
+  id                Int     @id @default(autoincrement())
+  name              String
+  short_description String?
+  price             Float
+  unit              String?
+
+  Category    Category[]
+  ingredients IngredientItem[] @relation("ProductToIngredient")
+  usedIn      IngredientItem[] @relation("IngredientToProduct")
+}
+
+model IngredientItem {
+  id                  Int    @id @default(autoincrement())
+  productId           Int
+  ingredientProductId Int
+  quantity            String
+
+  product           Product @relation("ProductToIngredient", fields: [productId], references: [id])
+  ingredientProduct Product @relation("IngredientToProduct", fields: [ingredientProductId], references: [id])
+
+  @@unique([productId, ingredientProductId])
+}
+
+model Category {
+  id           Int     @id @default(autoincrement())
+  name         String
+  description  String?
+  icon         String?
+  banner_image String?
+  categoryId   Int?    @unique
+
+  parent  Category? @relation("parentChild", fields: [categoryId], references: [id])
+  child   Category? @relation("parentChild")
+  product Product[]
+}
+
+model Storefront_Product_Data {
+  id Int @id @default(autoincrement())
+}

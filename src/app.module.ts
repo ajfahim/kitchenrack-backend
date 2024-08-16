@@ -6,8 +6,8 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 
 import config from './config/config';
-import { OtpModule } from './otp/otp.module';
-import { UserModule } from './user/user.module';
+import { OtpModule } from './features/otp/otp.module';
+import { UserModule } from './features/user/user.module';
 
 @Module({
   imports: [
