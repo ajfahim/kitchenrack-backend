@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import config from './config/config';
 import { OtpModule } from './features/otp/otp.module';
 import { UserModule } from './features/user/user.module';
+import { CategoryModule } from './features/category/category.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserModule } from './features/user/user.module';
     UserModule,
     AuthModule,
     OtpModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

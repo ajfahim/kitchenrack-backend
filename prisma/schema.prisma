@@ -75,15 +75,16 @@ model IngredientItem {
 
 model Category {
   id           Int     @id @default(autoincrement())
-  name         String
+  name         String  @unique
   description  String?
   icon         String?
   banner_image String?
-  categoryId   Int?    @unique
+  parent_id    Int?
 
-  parent  Category? @relation("parentChild", fields: [categoryId], references: [id])
-  child   Category? @relation("parentChild")
   product Product[]
+
+  parent Category?  @relation("parentChild", fields: [parent_id], references: [id])
+  child  Category[] @relation("parentChild")
 }
 
 model Storefront_Product_Data {

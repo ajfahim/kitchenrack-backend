@@ -6,12 +6,7 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { AuthenticationGuard } from 'src/auth/guards/authentication.guard';
-import { AuthorizationGuard } from 'src/auth/guards/authorization.guard';
-import { UserRole } from 'src/common/types/user';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
@@ -25,8 +20,6 @@ export class UserController {
     return this.userService.create(data);
   }
 
-  @Roles(UserRole.ADMIN)
-  @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @Get()
   findAll() {
     return this.userService.findAll();
