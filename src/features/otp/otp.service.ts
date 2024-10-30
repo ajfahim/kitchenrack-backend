@@ -16,8 +16,9 @@ export class OtpService {
       user_id: data.User.connect.id,
       type: data.type,
     });
+
     if (existingOtp) {
-      await this.deleteOtp(existingOtp.id, data.type);
+      await this.deleteOtp(existingOtp.user_id, data.type);
     }
     //store otp
     return await this.prismaService.otp.create({ data });
@@ -25,7 +26,6 @@ export class OtpService {
 
   //find otp with user id and type
   async findOneByUserAndType(data: Prisma.OtpWhereInput) {
-    console.log('🚀 ~ OtpService ~ findOneByUserAndType ~ data:', data);
     return await this.prismaService.otp.findFirst({ where: data });
   }
 
