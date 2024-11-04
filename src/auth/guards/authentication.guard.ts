@@ -18,7 +18,7 @@ export class AuthenticationGuard implements CanActivate {
       const access_token = request.cookies['access_token'];
 
       if (!access_token) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException("You're not logged in");
       }
 
       const data = this.jwtService.verify(access_token);

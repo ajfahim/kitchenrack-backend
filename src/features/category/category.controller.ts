@@ -20,7 +20,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @Roles(UserRole.USER)
+  @Roles(UserRole.ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @Post()
   create(@Body() createCategoryDto: CreateCategoryDto) {
