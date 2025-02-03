@@ -7,6 +7,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserService {
   constructor(private prisma: PrismaService) {}
   async create(data: Prisma.UserCreateInput) {
+    console.log('🚀 ~ UserService ~ create ~ data:', data);
     const existingPhone = data.phone && (await this.findOneByPhone(data.phone));
 
     if (existingPhone)

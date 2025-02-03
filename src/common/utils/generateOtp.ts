@@ -1,15 +1,15 @@
+// import { ConfigService } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
 import { OtpType } from 'src/common/types/otpTypes';
 
-export const generateOtpWithMessage = (otpType: OtpType) => {
-  const configService = new ConfigService();
-
+export const generateOtpWithMessage = (
+  otpType: OtpType,
+  configService: ConfigService,
+) => {
   let otpCode = generateRandomOtp(); // Function to generate a random OTP code
   let otpMessage: string;
 
-  const otpValidityMin = parseInt(
-    configService.get<string>('OTP_CODE_VALIDITY_MIN'),
-  );
+  const otpValidityMin = parseInt(configService.get<string>('otpValidityMin'));
 
   // Set expiration for registration OTP (10 Minutes)
   const expireAt = new Date();
