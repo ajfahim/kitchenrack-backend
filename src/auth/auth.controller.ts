@@ -8,17 +8,14 @@ import {
   Post,
   Req,
   Res,
-  UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { AuthenticationGuard } from 'src/auth/guards/authentication.guard';
 import sendResponse from 'src/common/utils/sendResponse';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegistrationDto } from './dto/registration.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 
-@UseGuards(AuthenticationGuard)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

@@ -22,7 +22,10 @@ export class AuthService {
     //create user
     const user = await this.userService.create(data);
     // generate otp
-    const otpMessage = generateOtpWithMessage(OtpType.REGISTRATION);
+    const otpMessage = generateOtpWithMessage(
+      OtpType.REGISTRATION,
+      this.ConfigService,
+    );
     // send otp sms
     const { otpCode, expireAt, otpMessage: message } = otpMessage;
     //FIXME: Uncomment this
@@ -79,7 +82,10 @@ export class AuthService {
       );
     }
     // generate otp
-    const otpMessage = generateOtpWithMessage(OtpType.LOGIN);
+    const otpMessage = generateOtpWithMessage(
+      OtpType.LOGIN,
+      this.ConfigService,
+    );
     // send otp sms
     const { otpCode, expireAt, otpMessage: message } = otpMessage;
     //FIXME: Uncomment this

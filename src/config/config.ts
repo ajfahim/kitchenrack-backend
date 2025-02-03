@@ -11,6 +11,6 @@ export default () => {
         senderId: process.env.BULKSMSBD_SENDER_ID,
       },
     },
-    otpValidityMin: parseInt(process.env.OTP_VALIDITY_MIN) || 3,
+    otpValidityMin: parseInt(process.env.OTP_CODE_VALIDITY_MIN) || 3,
   };
 };
