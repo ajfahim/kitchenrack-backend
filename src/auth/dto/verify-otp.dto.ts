@@ -1,28 +1,23 @@
 import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsNumberString,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsNumber, IsString, ValidateNested } from 'class-validator';
 import { UserRole } from 'src/common/types/user';
 
 export class User {
-  @IsNumberString()
-  id: string;
+  @IsNumber()
+  id: number;
 
   @IsString()
   phone: string;
 
   @IsString()
-  name: string;
+  full_name: string;
 
   @IsEnum(UserRole)
   role: string;
 }
 export class VerifyOtpDto {
-  @IsString()
-  code: string;
+  @IsNumber()
+  code: number;
 
   @IsString()
   type: string;

@@ -5,24 +5,22 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Observable } from 'rxjs';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     try {
       const access_token = request.cookies['access_token'];
 
       if (!access_token) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException("You're not logged in");
       }
 
-      const data = this.jwtService.verify(access_token);
-      request.user = data.payload;
+      const data = await this.jwtService.verifyAsync(access_token);
+      console.log('🚀 ~ AuthenticationGuard ~ data:', data);
+      request['user'] = data.payload;
       return true;
     } catch (err) {
       console.log(err);

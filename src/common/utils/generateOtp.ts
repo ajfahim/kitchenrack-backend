@@ -6,7 +6,7 @@ export const generateOtpWithMessage = (
   otpType: OtpType,
   configService: ConfigService,
 ) => {
-  let otpCode = generateRandomOtp(); // Function to generate a random OTP code
+  const otpCode = generateRandomOtp(); // Function to generate a random OTP code
   let otpMessage: string;
 
   const otpValidityMin = parseInt(configService.get<string>('otpValidityMin'));

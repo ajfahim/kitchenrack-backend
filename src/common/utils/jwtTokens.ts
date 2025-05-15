@@ -1,7 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
 
 type generateTokenPayload = {
-  payload: { id: string; phone: string; name: string; role: string };
+  payload: { id: number; phone: string; full_name: string; role: string };
   options: { expiresIn: string };
 };
 export const generateToken = async (
