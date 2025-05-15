@@ -2,8 +2,8 @@ export default () => {
   return {
     jwt: {
       secret: process.env.JWT_SECRET,
-      accessTokenExpiration: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '1d',
-      refreshTokenExpiration: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || '30d',
+      accessTokenExpiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '1d',
+      refreshTokenExpiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || '30d',
     },
     smsProvider: {
       bulkSmsBd: {

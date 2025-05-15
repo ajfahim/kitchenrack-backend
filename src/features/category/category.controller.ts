@@ -3,11 +3,16 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
   Param,
   Patch,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AuthenticationGuard } from 'src/auth/guards/authentication.guard';
 import { AuthorizationGuard } from 'src/auth/guards/authorization.guard';
@@ -23,30 +28,41 @@ export class CategoryController {
   @Roles(UserRole.ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @Post()
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoryService.create(createCategoryDto);
+  async create(@Body() createCategoryDto: CreateCategoryDto, @Res() response: Response) {
+    const result = await this.categoryService.create(createCategoryDto);
+    
+    return response.status(result.statusCode).json(result);
   }
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  async findAll(@Res() response: Response) {
+    const result = await this.categoryService.findAll();
+    return response.status(result.statusCode).json(result);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
+  async findOne(@Param('id') id: string, @Res() response: Response) {
+    const result = await this.categoryService.findOne(+id);
+    return response.status(result.statusCode).json(result);
   }
 
   @Patch(':id')
-  update(
+  @Roles(UserRole.ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  async update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
+    @Res() response: Response
   ) {
-    return this.categoryService.update(+id, updateCategoryDto);
+    const result = await this.categoryService.update(+id, updateCategoryDto);
+    return response.status(result.statusCode).json(result);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(+id);
+  @Roles(UserRole.ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  async remove(@Param('id') id: string, @Res() response: Response) {
+    const result = await this.categoryService.remove(+id);
+    return response.status(result.statusCode).json(result);
   }
 }
