@@ -1,24 +1,24 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { ProductService } from './product.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductFilterDto } from './dto/product-filter.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { UserRole } from 'src/common/types/user';
 import { AuthenticationGuard } from 'src/auth/guards/authentication.guard';
 import { AuthorizationGuard } from 'src/auth/guards/authorization.guard';
+import { UserRole } from 'src/common/types/user';
+import { CreateProductDto } from './dto/create-product.dto';
+import { ProductFilterDto } from './dto/product-filter.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductService } from './product.service';
 
 @Controller('products')
 export class ProductController {
@@ -58,6 +58,7 @@ export class ProductController {
     @Body() updateProductDto: UpdateProductDto,
     @Res() response: Response
   ) {
+    console.log(updateProductDto);
     const result = await this.productService.update(+id, updateProductDto);
     return response.status(result.statusCode).json(result);
   }

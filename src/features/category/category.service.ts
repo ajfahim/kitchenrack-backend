@@ -2,18 +2,35 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Category } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
 
 @Injectable()
 export class CategoryService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: any): Promise<any> {
+  /**
+   * Generates a slug from a string
+   * @param text The text to generate a slug from
+   * @returns A slug string
+   */
+  private generateSlug(text: string): string {
+    return text
+      .toLowerCase()
+      .replace(/\s+/g, '-')     // Replace spaces with -
+      .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+      .replace(/\-\-+/g, '-')   // Replace multiple - with single -
+      .replace(/^-+/, '')       // Trim - from start of text
+      .replace(/-+$/, '');      // Trim - from end of text
+  }
+
+  async create(data: CreateCategoryDto): Promise<any> {
     console.log('🚀 ~ CategoryService ~ create ~:', data);
 
     try {
       // Transform the data before creating the category
       const createData: any = {
         name: data.name,
+        slug: data.slug || this.generateSlug(data.name),
         description: data.description,
         icon: data.icon,
         banner_image: data.banner_image
@@ -55,13 +72,24 @@ export class CategoryService {
       console.error('Error creating category:', error);
       
       // Handle Prisma specific errors
-      if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
-        return {
-          statusCode: 409,
-          success: false,
-          message: `A category with the name '${data.name}' already exists`,
-          error: 'DUPLICATE_CATEGORY_NAME'
-        };
+      if (error.code === 'P2002') {
+        if (error.meta?.target?.includes('name')) {
+          return {
+            statusCode: 409,
+            success: false,
+            message: `A category with the name '${data.name}' already exists`,
+            error: 'DUPLICATE_CATEGORY_NAME'
+          };
+        }
+        
+        if (error.meta?.target?.includes('slug')) {
+          return {
+            statusCode: 409,
+            success: false,
+            message: `A category with the slug '${data.slug || this.generateSlug(data.name)}' already exists`,
+            error: 'DUPLICATE_CATEGORY_SLUG'
+          };
+        }
       }
       
       // Handle other Prisma errors
@@ -163,6 +191,11 @@ export class CategoryService {
       // Transform data if needed (similar to create method)
       const updateData: any = { ...updateCategoryDto };
       
+      // Generate slug from name if name is updated and slug isn't provided
+      if (updateCategoryDto.name && !updateCategoryDto.slug) {
+        updateData.slug = this.generateSlug(updateCategoryDto.name);
+      }
+      
       // Handle parent_id if it exists
       if (updateCategoryDto.parent_id) {
         const parent = await this.prisma.category.findUnique({
@@ -200,13 +233,24 @@ export class CategoryService {
       console.error(`Error updating category with id ${id}:`, error);
       
       // Handle unique constraint violations
-      if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
-        return {
-          statusCode: 409,
-          success: false,
-          message: `A category with this name already exists`,
-          error: 'DUPLICATE_CATEGORY_NAME'
-        };
+      if (error.code === 'P2002') {
+        if (error.meta?.target?.includes('name')) {
+          return {
+            statusCode: 409,
+            success: false,
+            message: `A category with this name already exists`,
+            error: 'DUPLICATE_CATEGORY_NAME'
+          };
+        }
+        
+        if (error.meta?.target?.includes('slug')) {
+          return {
+            statusCode: 409,
+            success: false,
+            message: `A category with this slug already exists`,
+            error: 'DUPLICATE_CATEGORY_SLUG'
+          };
+        }
       }
       
       return {

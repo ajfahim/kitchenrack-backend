@@ -22,8 +22,8 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  otps Otp[]
-  Auth Auth?
+  otps    Otp[]
+  Auth    Auth?
   reviews Review[]
 }
 
@@ -51,95 +51,97 @@ model Otp {
 }
 
 model Product {
-  id                Int       @id @default(autoincrement())
+  id                Int     @id @default(autoincrement())
   name              String
-  slug              String    @unique
-  sku               String?   @unique
-  status            String    @default("active") // active, inactive, draft
+  slug              String  @unique
+  sku               String? @unique
+  status            String  @default("active") // active, inactive, draft
   short_description String?
-  description       String?   // Long description, could be HTML
+  description       String? // Long description, could be HTML
   price             Float
   sale_price        Float?
-  cost_price        Float?    // For profit calculations
+  cost_price        Float? // For profit calculations
   unit              String?
-  stock_quantity    Int       @default(0)
-  weight            Float?    // For shipping calculations
-  dimensions        Json?     // Store height, width, length
+  stock_quantity    Int     @default(0)
+  weight            Float? // For shipping calculations
   brand             String?
-  featured          Boolean   @default(false)
-  
+  featured          Boolean @default(false)
+  has_variants      Boolean @default(false)
+
   // Timestamps
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
   // Relations
-  categories        Category[]
-  images            ProductImage[]
-  variants          ProductVariant[]
-  attributes        ProductAttribute[]
-  reviews           Review[]
+  categories Category[]
+  images     ProductImage[]
+  variants   ProductVariant[]
+  attributes ProductAttribute[]
+  reviews    Review[]
 }
 
 model ProductImage {
-  id           Int      @id @default(autoincrement())
-  url          String
-  alt_text     String?
+  id            Int     @id @default(autoincrement())
+  url           String
+  alt_text      String?
   display_order Int     @default(0)
-  
-  product_id   Int
-  product      Product  @relation(fields: [product_id], references: [id])
-  
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+
+  product_id Int
+  product    Product @relation(fields: [product_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model ProductVariant {
-  id           Int      @id @default(autoincrement())
-  name         String
-  sku          String?  @unique
-  price        Float?   // Override main product price
-  stock        Int      @default(0)
-  attributes   Json     // Store color, size, etc. as JSON
-  
-  product_id   Int
-  product      Product  @relation(fields: [product_id], references: [id])
-  
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  id         Int     @id @default(autoincrement())
+  name       String
+  sku        String? @unique
+  price      Float? // Override main product price
+  sale_price Float? // Override main product sale price
+  stock      Int     @default(0)
+  // attributes field removed
+
+  product_id Int
+  product    Product @relation(fields: [product_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model ProductAttribute {
-  id           Int      @id @default(autoincrement())
-  name         String
-  value        String
-  
-  product_id   Int
-  product      Product  @relation(fields: [product_id], references: [id])
-  
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
-  
+  id    Int    @id @default(autoincrement())
+  name  String
+  value String
+
+  product_id Int
+  product    Product @relation(fields: [product_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
   @@unique([product_id, name, value])
 }
 
 model Review {
-  id           Int      @id @default(autoincrement())
-  rating       Int
-  title        String?
-  content      String?
-  
-  user_id      Int
-  product_id   Int
-  product      Product  @relation(fields: [product_id], references: [id])
-  user         User     @relation(fields: [user_id], references: [id])
-  
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  id      Int     @id @default(autoincrement())
+  rating  Int
+  title   String?
+  content String?
+
+  user_id    Int
+  product_id Int
+  product    Product @relation(fields: [product_id], references: [id])
+  user       User    @relation(fields: [user_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Category {
   id           Int     @id @default(autoincrement())
   name         String  @unique
+  slug         String  @unique
   description  String?
   icon         String?
   banner_image String?

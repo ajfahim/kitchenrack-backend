@@ -1,17 +1,17 @@
+import { Type } from 'class-transformer';
 import {
-  IsString,
-  IsOptional,
-  IsNumber,
-  IsBoolean,
+  ArrayMinSize,
   IsArray,
+  IsBoolean,
+  IsEnum,
+  IsJSON,
+  IsNumber,
+  IsOptional,
+  IsString,
   IsUrl,
   Min,
-  IsJSON,
-  IsEnum,
   ValidateNested,
-  ArrayMinSize,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
 enum ProductStatus {
   ACTIVE = 'active',
@@ -72,10 +72,14 @@ export class CreateProductVariantDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  sale_price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
   stock?: number;
 
-  @IsJSON()
-  attributes: string; // JSON string of attributes
+  // Attributes field removed
 }
 
 export class CreateProductDto {
@@ -128,10 +132,6 @@ export class CreateProductDto {
   @IsNumber()
   @Min(0)
   weight?: number;
-
-  @IsOptional()
-  @IsJSON()
-  dimensions?: string; // JSON string of dimensions
 
   @IsOptional()
   @IsString()

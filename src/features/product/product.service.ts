@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { TMeta } from 'src/common/types/apiResponse';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductFilterDto, ProductSortField, SortOrder } from './dto/product-filter.dto';
-import { TMeta } from 'src/common/types/apiResponse';
-import { Prisma } from '@prisma/client';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -18,7 +18,6 @@ export class ProductService {
         images = [],
         variants = [],
         attributes = [],
-        dimensions,
         ...productData
       } = createProductDto;
 
@@ -65,16 +64,13 @@ export class ProductService {
         };
       }
 
-      // Parse JSON string to object if provided
-      const parsedDimensions = dimensions ? JSON.parse(dimensions as string) : null;
-
       // Create product with all related entities in a transaction
       const newProduct = await this.prisma.$transaction(async (tx) => {
         // Create the base product
         const product = await tx.product.create({
           data: {
             ...productData,
-            dimensions: parsedDimensions,
+            has_variants: variants && variants.length > 0 ? true : false,
             // Connect categories
             categories: {
               connect: categories.map(id => ({ id })),
@@ -95,15 +91,16 @@ export class ProductService {
         // Create product variants if any
         if (variants.length > 0) {
           for (const variant of variants) {
-            const parsedAttributes = JSON.parse(variant.attributes as string);
             await tx.productVariant.create({
               data: {
                 name: variant.name,
                 sku: variant.sku,
                 price: variant.price,
+                sale_price: variant.sale_price,
                 stock: variant.stock || 0,
-                attributes: parsedAttributes,
-                product_id: product.id,
+                product: {
+                  connect: { id: product.id }
+                }
               },
             });
           }
@@ -258,6 +255,7 @@ export class ProductService {
               display_order: 'asc',
             },
           },
+          variants: true,
         },
       });
 
@@ -404,9 +402,11 @@ export class ProductService {
         images,
         variants,
         attributes,
-        dimensions,
+        deletedImageIds, // Extract this field explicitly
         ...productData
       } = updateProductDto;
+
+      console.log(updateProductDto);
 
       // Check for slug or SKU uniqueness if they're being updated
       if (productData.slug || productData.sku) {
@@ -456,9 +456,6 @@ export class ProductService {
         }
       }
 
-      // Parse JSON string to object if provided
-      const parsedDimensions = dimensions ? JSON.parse(dimensions as string) : undefined;
-
       // Update product with all related entities in a transaction
       const updatedProduct = await this.prisma.$transaction(async (tx) => {
         // Update the base product
@@ -466,7 +463,8 @@ export class ProductService {
           where: { id },
           data: {
             ...productData,
-            ...(parsedDimensions && { dimensions: parsedDimensions }),
+            // Update has_variants flag based on provided variants
+            has_variants: variants && variants.length > 0 ? true : false,
             // Update categories if provided
             ...(categories && {
               categories: {
@@ -480,18 +478,32 @@ export class ProductService {
         });
 
         // Handle product images if provided
-        if (images && images.length > 0) {
-          // Delete existing images and create new ones
-          await tx.productImage.deleteMany({
-            where: { product_id: id },
-          });
+        if ((images && images.length > 0) || (deletedImageIds && deletedImageIds.length > 0)) {
+          // If specific image IDs are provided for deletion
+          if (deletedImageIds && deletedImageIds.length > 0) {
+            // Delete only the specified images
+            await tx.productImage.deleteMany({
+              where: {
+                id: { in: deletedImageIds },
+                product_id: id
+              },
+            });
+          } else if (images && images.length > 0) {
+            // If no specific deletion IDs but new images provided, delete all existing
+            await tx.productImage.deleteMany({
+              where: { product_id: id },
+            });
+          }
 
-          await tx.productImage.createMany({
-            data: images.map(image => ({
-              ...image,
-              product_id: product.id,
-            })),
-          });
+          // Add new images if provided
+          if (images && images.length > 0) {
+            await tx.productImage.createMany({
+              data: images.map(image => ({
+                ...image,
+                product_id: product.id,
+              })),
+            });
+          }
         }
 
         // Handle product variants if provided
@@ -503,15 +515,16 @@ export class ProductService {
 
           // Create new variants
           for (const variant of variants) {
-            const parsedAttributes = JSON.parse(variant.attributes as string);
             await tx.productVariant.create({
               data: {
                 name: variant.name,
                 sku: variant.sku,
                 price: variant.price,
+                sale_price: variant.sale_price,
                 stock: variant.stock || 0,
-                attributes: parsedAttributes,
-                product_id: product.id,
+                product: {
+                  connect: { id: product.id }
+                }
               },
             });
           }

@@ -14,9 +14,9 @@ export class Product implements PrismaProduct {
   unit: string | null;
   stock_quantity: number;
   weight: number | null;
-  dimensions: any | null; // Using any for Json type
   brand: string | null;
   featured: boolean;
+  has_variants: boolean;
   created_at: Date;
   updated_at: Date;
 }

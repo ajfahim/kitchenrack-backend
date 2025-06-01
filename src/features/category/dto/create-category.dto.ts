@@ -1,9 +1,16 @@
-import { IsInt, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
+import { IsInt, IsOptional, IsString, IsUrl, MaxLength, Matches } from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
   @MaxLength(255)
   name: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message: 'Slug must contain only lowercase letters, numbers, and hyphens',
+  })
+  slug?: string;
 
   @IsOptional()
   @IsString()
