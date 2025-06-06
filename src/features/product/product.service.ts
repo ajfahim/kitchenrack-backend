@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductFilterDto, ProductSortField, SortOrder } from './dto/product-filter.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { computeDisplayPrices } from './product-pricing.util';
 
 @Injectable()
 export class ProductService {
@@ -182,7 +183,7 @@ export class ProductService {
       // Calculate pagination values
       const skip = (page - 1) * limit;
 
-      // Build where conditions
+      // Build where conditions (excluding price for now)
       const where: Prisma.ProductWhereInput = {};
 
       // Search in name or description
@@ -190,92 +191,54 @@ export class ProductService {
         where.OR = [
           { name: { contains: search, mode: 'insensitive' } },
           { description: { contains: search, mode: 'insensitive' } },
-          { short_description: { contains: search, mode: 'insensitive' } },
-          { sku: { contains: search, mode: 'insensitive' } },
         ];
       }
 
-      // Filter by category
       if (category_id) {
         where.categories = {
-          some: {
-            id: category_id,
-          },
+          some: { id: category_id },
         };
       }
 
-      // Filter by price range
-      if (min_price !== undefined || max_price !== undefined) {
-        where.price = {};
-        
-        if (min_price !== undefined) {
-          where.price.gte = min_price;
-        }
-        
-        if (max_price !== undefined) {
-          where.price.lte = max_price;
-        }
-      }
-
-      // Filter by featured
       if (featured !== undefined) {
         where.featured = featured;
       }
 
-      // Filter by status
       if (status) {
         where.status = status;
       }
 
-      // Filter by brand
       if (brand) {
-        where.brand = {
-          contains: brand,
-          mode: 'insensitive',
-        };
+        where.brand = brand;
       }
 
-      // Build order by
-      const orderBy: Prisma.ProductOrderByWithRelationInput = {};
-      orderBy[sort_by] = sort_order.toLowerCase() as Prisma.SortOrder;
-
-      // Get total count for pagination
-      const total = await this.prisma.product.count({ where });
-
-      // Get products with relations
+      // Fetch all products matching non-price filters, including variants
       const products = await this.prisma.product.findMany({
-        skip,
-        take: limit,
         where,
-        orderBy,
         include: {
           categories: true,
-          images: {
-            orderBy: {
-              display_order: 'asc',
-            },
-          },
+          images: true,
           variants: true,
+          attributes: true,
         },
       });
 
-      // Calculate total pages
-      const totalPage = Math.ceil(total / limit);
-
-      // Build metadata
-      const meta: TMeta = {
-        page,
-        limit,
-        total,
-        totalPage,
-      };
+      // Compute display_price and display_sale_price for each product
+      let productsWithDisplayPrice = products.map(product => {
+        const { display_price, display_sale_price } = computeDisplayPrices(product);
+        return {
+          ...product,
+          display_price,
+          display_sale_price,
+        };
+      });
 
       return {
         statusCode: 200,
         success: true,
         message: 'Products retrieved successfully',
         meta,
-        data: products,
+        data: productsWithDisplayPrice,
       };
     } catch (error) {
       console.error('Error retrieving products:', error);
