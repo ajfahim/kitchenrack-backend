@@ -9,6 +9,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -35,8 +36,8 @@ export class CategoryController {
   }
 
   @Get()
-  async findAll(@Res() response: Response) {
-    const result = await this.categoryService.findAll();
+  async findAll(@Query('parent_id') parentId: number, @Res() response: Response) {
+    const result = await this.categoryService.findAll(parentId);
     return response.status(result.statusCode).json(result);
   }
 
