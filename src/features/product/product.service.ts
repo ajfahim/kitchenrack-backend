@@ -237,7 +237,11 @@ export class ProductService {
         statusCode: 200,
         success: true,
         message: 'Products retrieved successfully',
-        meta,
+        meta: {
+          total: products.length,
+          page,
+          limit,
+        },
         data: productsWithDisplayPrice,
       };
     } catch (error) {
