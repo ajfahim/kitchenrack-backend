@@ -27,13 +27,19 @@ export class ProductController {
   @Post()
   @Roles(UserRole.ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
-  async create(@Body() createProductDto: CreateProductDto, @Res() response: Response) {
+  async create(
+    @Body() createProductDto: CreateProductDto,
+    @Res() response: Response,
+  ) {
     const result = await this.productService.create(createProductDto);
     return response.status(result.statusCode).json(result);
   }
 
   @Get()
-  async findAll(@Query() filterDto: ProductFilterDto, @Res() response: Response) {
+  async findAll(
+    @Query() filterDto: ProductFilterDto,
+    @Res() response: Response,
+  ) {
     const result = await this.productService.findAll(filterDto);
     return response.status(result.statusCode).json(result);
   }
@@ -56,7 +62,7 @@ export class ProductController {
   async update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
-    @Res() response: Response
+    @Res() response: Response,
   ) {
     console.log(updateProductDto);
     const result = await this.productService.update(+id, updateProductDto);
