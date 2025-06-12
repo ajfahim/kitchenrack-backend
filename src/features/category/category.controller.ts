@@ -3,9 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
-  HttpException,
-  HttpStatus,
   Param,
   Patch,
   Post,
@@ -29,15 +26,22 @@ export class CategoryController {
   @Roles(UserRole.ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @Post()
-  async create(@Body() createCategoryDto: CreateCategoryDto, @Res() response: Response) {
+  async create(
+    @Body() createCategoryDto: CreateCategoryDto,
+    @Res() response: Response,
+  ) {
     const result = await this.categoryService.create(createCategoryDto);
-    
+
     return response.status(result.statusCode).json(result);
   }
 
   @Get()
-  async findAll(@Query('parent_id') parentId: number, @Res() response: Response) {
-    const result = await this.categoryService.findAll(parentId);
+  async findAll(
+    @Query('parent_id') parentId: number,
+    @Query('parent_only') parent_only: boolean,
+    @Res() response: Response,
+  ) {
+    const result = await this.categoryService.findAll(parentId, parent_only);
     return response.status(result.statusCode).json(result);
   }
 
@@ -53,7 +57,7 @@ export class CategoryController {
   async update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
-    @Res() response: Response
+    @Res() response: Response,
   ) {
     const result = await this.categoryService.update(+id, updateCategoryDto);
     return response.status(result.statusCode).json(result);

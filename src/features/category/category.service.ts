@@ -111,8 +111,7 @@ export class CategoryService {
     }
   }
 
-  async findAll(parent_id?: number): Promise<any> {
-    console.log({ parent_id: +parent_id });
+  async findAll(parent_id?: number, parent_only?: boolean): Promise<any> {
     try {
       let categories;
       if (
@@ -123,6 +122,11 @@ export class CategoryService {
         categories = await this.prisma.category.findMany({
           where: { parent_id },
           include: { child: true, parent: true },
+        });
+      } else if (parent_only === true) {
+        categories = await this.prisma.category.findMany({
+          where: { parent_id: null },
+          include: { child: true },
         });
       } else {
         categories = await this.prisma.category.findMany({

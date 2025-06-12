@@ -212,6 +212,8 @@ export class ProductService {
         where.brand = brand;
       }
 
+      // --- Remove Prisma-level price filtering ---
+
       // Fetch all products matching non-price filters, including variants
       const products = await this.prisma.product.findMany({
         where,
@@ -223,8 +225,24 @@ export class ProductService {
         },
       });
 
+      // --- JS-side price filtering for min_price and max_price ---
+      const filteredProducts = products.filter(product => {
+        let prices: number[] = [];
+        if (product.has_variants && product.variants.length > 0) {
+          prices = product.variants.map(v => v.price).filter(p => typeof p === 'number');
+        } else {
+          prices = [product.price];
+        }
+        const minProductPrice = Math.min(...prices);
+        const maxProductPrice = Math.max(...prices);
+        if (min_price !== undefined && minProductPrice < min_price) return false;
+        if (max_price !== undefined && maxProductPrice > max_price) return false;
+        return true;
+      });
+      // --- End JS-side price filtering ---
+
       // Compute display_price and display_sale_price for each product
-      let productsWithDisplayPrice = products.map(product => {
+      let productsWithDisplayPrice = filteredProducts.map(product => {
         const { display_price, display_sale_price } = computeDisplayPrices(product);
         return {
           ...product,
