@@ -152,7 +152,3 @@ model Category {
   parent Category?  @relation("parentChild", fields: [parent_id], references: [id])
   child  Category[] @relation("parentChild")
 }
-
-model Storefront_Product_Data {
-  id Int @id @default(autoincrement())
-}
