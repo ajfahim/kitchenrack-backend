@@ -29,7 +29,6 @@ export class AuthService {
   async registration(data: RegistrationDto): Promise<TApiResponse<User>> {
     //create user
     const user = await this.userService.create(data);
-    console.log('🚀 ~ AuthService ~ user:', user);
     // generate otp
     const otpMessage = generateOtpWithMessage(
       OtpType.REGISTRATION,
